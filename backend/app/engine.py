@@ -152,7 +152,9 @@ def redact(t):
     t = re.sub(r"(?<!\d)(?:\+91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}(?!\d)", "[PHONE]", t)
     t = re.sub(r"(?<!\d)\d{4}[\s-]?\d{4}[\s-]?\d{4}(?!\d)", "[ID-NUMBER]", t)
     t = re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "[EMAIL]", t)
-    t = re.sub(r"(my name is|i am|माझे नाव|माझं नाव|मेरा नाम)\s+([^\s,.।]+(?:\s+[^\s,.।]+)?)", r"\1 [NAME]", t, flags=re.I)
+    keep = ("गुप्त", "न बता", "मत बता", "सांगू नका", "secret", "hidden", "confidential", "anonymous", "not ", "scared", "afraid")
+    t = re.sub(r"(my name is|i am|माझे नाव|माझं नाव|मेरा नाम)\s+([^\s,.।]+(?:\s+[^\s,.।]+)?)",
+               lambda m: m.group(0) if m.group(2).lower().startswith(keep) else m.group(1) + " [NAME]", t, flags=re.I)
     return t
 
 
