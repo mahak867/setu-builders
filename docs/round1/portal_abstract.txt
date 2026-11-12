@@ -1,0 +1,23 @@
+Nyay Setu by Setu Builders: grievance redressal you can audit. AI proposes, rules decide, citizens confirm.
+
+Problem: Today's portals reward closing tickets, not fixing problems. DARPG's own analysis found 5.01 lakh recurring grievances on CPGRAMS, and most portals are English-only text forms.
+
+Approach: A multi-agent system built on LangGraph with a FastAPI + PostgreSQL/pgvector mock backend serving the Grievance Category Master, Mock Grievance History and Department Directory.
+1. Intake Agent: accepts messy voice or text in Marathi, Hindi or English, asks follow-up questions, and produces a structured draft (category, description, location, urgency, missing details) that the citizen confirms before submission.
+2. Redaction: masks personal data before any further LLM call; Identity-Hiding categories are masked in the officer view and traces.
+3. Case Memory (RAG): retrieves the top-3 similar past cases with similarity scores as evidence, never as the decision.
+4. Duplicate + SLA Agent: groups complaints by meaning, location and time while every grievance keeps its own reference number; a model trained on history flags likely SLA breaches and recurrences and escalates before the deadline.
+5. Policy Gate: deterministic code reading the Category Master. Sensitive cases always go to human review; low calibrated confidence goes to human review; only routine categories can be auto-proposed. If the LLM is down, every case still reaches a human.
+6. Action Agent: updates the database, assigns the department, fires n8n webhooks and sends simulated email/WhatsApp updates.
+
+Every AI action is logged under the AI_SYSTEM actor (model, confidence, timestamp, reasoning, rule ID), and each grievance has a public Langfuse trace: intake, retrieval, policy, decision, action.
+
+What is new:
+- Safety eval harness: 60 adversarial test grievances (hidden sensitive cases, prompt injection, code-mixed text) with a live scorecard. Target: 0 sensitive cases auto-closed, 0 auto-rejections, 0 successful injections.
+- Closure integrity loop: AI can only mark a case "Proposed resolved"; the citizen confirms or disputes in their language, a dispute reopens it automatically, and the AI reopen rate is shown publicly.
+- Recurrence escalation: repeated issues at the same place go to the department head as structural problems.
+- Explained decisions: each case shows the exact rule applied, confidence vs threshold and retrieved cases, labelled as AI suggestions, not verified facts.
+
+Hard rules in code: no automatic rejection, no liability judgments, sensitive cases never auto-closed, priority = severity x urgency x affected population (not raw volume).
+
+Expected outcomes: a citizen chat portal with voice, an officer queue (AI summary, sentiment, confidence, gate reason, duplicate groups, SLA alerts), a dispute button, a public trace link, and a demo of an auto-resolved routine case, a sensitive case kept in human review, and a duplicate/escalation scenario.

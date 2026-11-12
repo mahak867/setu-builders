@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nyay Setu</title>
+<style>
+@font-face{font-family:NSD;src:url(fonts/noto-sans-devanagari-devanagari-400-normal.woff2) format("woff2");font-weight:400}
+@font-face{font-family:NSD;src:url(fonts/noto-sans-devanagari-devanagari-700-normal.woff2) format("woff2");font-weight:700}
+:root{--p:#4a166b;--p2:#7b3fa0;--t:#f3eef8;--o:#c24e1b;--ot:#fbeee6;--d:#1e1e2a;--m:#62627a;--b:#e2dbea;--g:#2e7d32;--gt:#e8f5e9;--r:#b71c1c;--rt:#fdecea;--bg:#faf8fc}
+*{box-sizing:border-box}body{margin:0;font-family:"Segoe UI",Inter,Arial,NSD,sans-serif;color:var(--d);background:var(--bg);font-size:14px}
+header{background:var(--p);color:#fff;display:flex;align-items:center;gap:20px;padding:10px 22px}
+header b{font-size:19px}header small{opacity:.8}nav{margin-left:auto;display:flex;gap:6px}
+nav a{color:#fff;text-decoration:none;padding:7px 14px;border-radius:8px;font-weight:600}nav a.on{background:#fff;color:var(--p)}
+.banner{background:var(--ot);color:#7a3210;padding:5px 22px;font-size:12px}
+main{padding:16px 22px;display:none}main.on{display:grid;gap:16px}
+#citizen.on{grid-template-columns:1.15fr 1fr}#officer.on{grid-template-columns:430px 1fr}#admin.on{grid-template-columns:1fr 1fr}
+.card{background:#fff;border:1px solid var(--b);border-radius:12px;padding:14px 16px}
+h2{margin:0 0 10px;font-size:15px;color:var(--p)}h3{margin:14px 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--m)}
+.chat{height:400px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:6px 2px}
+.msg{max-width:78%;padding:9px 12px;border-radius:12px;line-height:1.45}.me{align-self:flex-end;background:var(--p);color:#fff}.bot{align-self:flex-start;background:var(--t)}
+.draft{align-self:flex-start;border:1.5px solid var(--p2);border-radius:12px;padding:10px 12px;width:88%;background:#fff}
+.draft table{width:100%;border-collapse:collapse}.draft td{padding:3px 6px;vertical-align:top}.draft td:first-child{color:var(--m);width:110px}
+.row{display:flex;gap:8px;align-items:center}.row input,.row select,textarea{flex:1;padding:9px 10px;border:1px solid var(--b);border-radius:8px;font:inherit}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:9px 14px;background:var(--p);color:#fff;cursor:pointer}
+button.o{background:var(--o)}button.g{background:var(--g)}button.l{background:var(--t);color:var(--p)}button.sm{padding:5px 9px;font-size:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.chips button{background:var(--t);color:var(--p);font-weight:500;font-size:12px;padding:5px 9px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--t);color:var(--p);margin:1px 2px 1px 0;white-space:nowrap}
+.tag.r{background:var(--rt);color:var(--r)}.tag.o{background:var(--ot);color:var(--o)}.tag.g{background:var(--gt);color:var(--g)}
+.q{border:1px solid var(--b);border-radius:10px;padding:9px 11px;margin-bottom:8px;cursor:pointer;background:#fff}.q.on{border-color:var(--p);box-shadow:0 0 0 2px var(--t)}
+.q .top{display:flex;justify-content:space-between;font-weight:700}.q .pr{color:var(--o)}.q p{margin:4px 0;color:var(--m);font-size:12.5px}
+.ai{background:var(--t);border-radius:10px;padding:9px 12px}.ai small,.unv{color:var(--o);font-weight:700;font-size:11px}
+.rule{border-left:0;background:var(--ot);border-radius:10px;padding:9px 12px}.rule.auto{background:var(--gt)}
+.bar{height:10px;background:#eee;border-radius:9px;position:relative;margin:6px 0 2px}.bar i{display:block;height:100%;border-radius:9px;background:var(--p2)}.bar u{position:absolute;top:-4px;width:2px;height:18px;background:var(--o)}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}table.t td,table.t th{padding:5px 6px;border-bottom:1px solid var(--b);text-align:left;vertical-align:top}table.t th{color:var(--m);font-size:11px;text-transform:uppercase}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px}.kv span:nth-child(odd){color:var(--m)}
+.trace{display:flex;gap:4px;flex-wrap:wrap}.trace div{background:var(--t);border-radius:8px;padding:5px 9px;font-size:12px}.trace div b{display:block;color:var(--p)}.trace .pg{background:var(--o);color:#fff}.trace .pg b{color:#fff}
+.tl{list-style:none;margin:0;padding:0}.tl li{padding:5px 0 5px 16px;border-left:2px solid var(--b);position:relative;font-size:12.5px}.tl li:before{content:"";position:absolute;left:-5px;top:9px;width:8px;height:8px;border-radius:50%;background:var(--p2)}.tl small{color:var(--m)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{background:var(--t);border-radius:10px;padding:10px 12px}.kpi b{font-size:24px;color:var(--p);display:block}.kpi.z b{color:var(--g)}
+.wa{background:#e7f6e1;border-radius:10px;padding:8px 11px;margin-bottom:6px;font-size:13px}.wa small{color:var(--m);display:block}
+.hb{display:grid;grid-template-columns:190px 1fr 26px;gap:8px;align-items:center;font-size:12.5px;margin:4px 0}.hb i{display:block;height:12px;border-radius:6px;background:var(--o)}
+.full{grid-column:1/-1}
+</style>
+</head>
+<body>
+<header><b>न्याय सेतू · Nyay Setu</b><small>AI proposes · Rules decide · Citizens confirm</small>
+<nav><a href="#citizen">Citizen</a><a href="#officer">Officer queue</a><a href="#admin">Admin &amp; safety</a></nav></header>
+<div class="banner">Prototype on synthetic data. AI outputs are suggestions, not verified facts. No case can be rejected or closed by the AI.</div>
+
+<main id="citizen">
+ <section class="card"><h2>Tell us your problem · आपली तक्रार सांगा · अपनी शिकायत बताएं</h2>
+  <div class="chips" id="samples"></div>
+  <div class="chat" id="chat"></div>
+  <div class="row"><select id="lang" style="flex:0 0 110px"><option value="mr-IN">मराठी</option><option value="hi-IN">हिन्दी</option><option value="en-IN">English</option></select>
+   <input id="msg" placeholder="Type or press the mic and speak…"><button class="l" id="mic" title="Speak">🎤</button><button id="send">Send</button></div>
+ </section>
+ <section class="card"><h2>Track my grievance</h2>
+  <div class="row"><input id="ref" placeholder="Reference number, e.g. NS-2026-00001"><button id="track">Track</button></div>
+  <div id="trackout" style="margin-top:12px;color:var(--m)">Submit a complaint or enter a reference number.</div>
+ </section>
+</main>
+
+<main id="officer">
+ <section class="card"><h2>Queue <span style="font-weight:400;color:var(--m)">sorted by priority = severity × urgency × affected population</span></h2><div id="queue"></div></section>
+ <section class="card" id="detail"><span style="color:var(--m)">Select a case.</span></section>
+</main>
+
+<main id="admin">
+ <section class="card full"><h2>Safety scorecard <span style="font-weight:400;color:var(--m)" id="evalmeta"></span></h2><div class="kpis" id="score"></div><div id="fails" style="margin-top:8px;font-size:12.5px;color:var(--m)"></div></section>
+ <section class="card"><h2>Live system</h2><div class="kpis" id="live" style="grid-template-columns:repeat(3,1fr)"></div>
+  <h3>Policy rules applied</h3><div id="rules"></div><h3>Routing by language (fairness check)</h3><table class="t" id="fair"></table></section>
+ <section class="card"><h2>Recurring-problem hotspots <span style="font-weight:400;color:var(--m)">late or unsatisfied closures, mock history</span></h2><div id="hot"></div>
+  <h3>Webhooks dispatched</h3><table class="t" id="hooks"></table></section>
+ <section class="card"><h2>Audit log <span style="font-weight:400;color:var(--m)">every AI action under AI_SYSTEM</span></h2><table class="t" id="audit"></table></section>
+ <section class="card"><h2>Notifications sent (simulated)</h2><div id="notes"></div></section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s),api=(u,b)=>fetch(u,b?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}:{}).then(async r=>{const j=await r.json();if(!r.ok)throw new Error(j.detail);return j});
+const esc=s=>String(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let sid="s"+Date.now(),cur=null;
+const L={mr:"मराठी",hi:"हिन्दी",en:"English"};
+const SAMPLES=[["मराठी · पथदिवा","भाग्य नगर मधील पथदिवा चार दिवसांपासून बंद आहे, रात्री खूप अंधार असतो."],["हिन्दी · रिश्वत","वजीराबाद कार्यालय का बाबू मेरी फाइल आगे बढ़ाने के लिए रिश्वत मांग रहा है। मेरा नाम गुप्त रखें।"],
+["मराठी · गटार","तरोडा मधील गटार पुन्हा तुंबले आहे, सांडपाणी रस्त्यावर येत आहे."],["English · no location","The streetlight outside my house is not working."],["English · potholes","Huge potholes on the main road in Itwara, two bikes fell yesterday."]];
+$("#samples").innerHTML=SAMPLES.map((s,i)=>`<button data-i="${i}">${s[0]}</button>`).join("");
+$("#samples").onclick=e=>{if(e.target.dataset.i){$("#msg").value=SAMPLES[e.target.dataset.i][1]}};
+function add(html,cls){const d=document.createElement("div");d.className=cls;d.innerHTML=html;$("#chat").append(d);$("#chat").scrollTop=1e6;return d}
+add("नमस्कार! तुमची तक्रार मराठी, हिंदी किंवा इंग्रजीत सांगा. · Hello! Tell me your complaint in Marathi, Hindi or English.","msg bot");
+async function send(){const m=$("#msg").value.trim();if(!m)return;$("#msg").value="";add(esc(m),"msg me");
+ const r=await api("/api/chat",{session_id:sid,message:m});add(esc(r.reply),"msg bot");
+ if(r.complete){const d=r.draft;const c=add(`<b>Draft for your confirmation</b> <span class="unv">AI-prepared, please check</span>
+ <table><tr><td>Category</td><td>${esc(d.category)} · ${esc(d.subcategory)}</td></tr><tr><td>Description</td><td>${esc(d.description)}</td></tr>
+ <tr><td>Location</td><td>${esc(d.location||"not given")}</td></tr><tr><td>Urgency</td><td>${d.urgency}/5</td></tr><tr><td>Language</td><td>${L[d.lang]}</td></tr>
+ <tr><td>Missing details</td><td>${d.missing.length?esc(d.missing.join(", ")):"none"}</td></tr></table>
+ <div class="row" style="margin-top:8px"><button class="g">✓ Confirm and submit</button><button class="l">✎ Add more</button></div>`,"draft");
+ c.querySelector(".g").onclick=async()=>{const g=await api("/api/grievances",{session_id:sid});sid="s"+Date.now();c.querySelector(".row").remove();
+  add(`Submitted. Reference <b>${g.ref}</b>.`,"msg bot");$("#ref").value=g.ref;track()};
+ c.querySelector(".l").onclick=()=>$("#msg").focus()}}
+$("#send").onclick=send;$("#msg").onkeydown=e=>e.key=="Enter"&&send();
+$("#mic").onclick=()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){alert("Voice input needs Chrome or Edge. You can type instead.");return}
+ const r=new R();r.lang=$("#lang").value;r.onresult=e=>{$("#msg").value=e.results[0][0].transcript};r.start()};
+function speak(t,l){const u=new SpeechSynthesisUtterance(t);u.lang={mr:"mr-IN",hi:"hi-IN",en:"en-IN"}[l];speechSynthesis.speak(u)}
+async function track(){const ref=$("#ref").value.trim();if(!ref)return;let g;try{g=await api("/api/grievances/"+ref)}catch(e){$("#trackout").textContent=e.message;return}
+ const last=g.notifications.filter(n=>n.recipient=="citizen").slice(-1)[0];
+ $("#trackout").innerHTML=`<div class="row" style="justify-content:space-between"><b style="font-size:16px">${g.ref}</b><span class="tag ${g.status=="Closed"?"g":g.status=="Reopened"?"r":"o"}">${g.status}</span></div>
+ <div class="kv" style="margin:8px 0"><span>Category</span><span>${esc(g.category)}</span><span>Department</span><span>${esc(g.department)}</span><span>Due by</span><span>${g.due.slice(0,10)}</span>
+ ${g.group_id?`<span>Related reports</span><span>${g.group.length} in incident ${g.group_id} (your reference stays separate)</span>`:""}</div>
+ ${g.status=="Proposed resolved"?`<div class="rule"><b>Is your problem fixed?</b><br>${esc(g.resolution)}<div class="row" style="margin-top:8px"><button class="g" id="ok">✓ Yes, it is fixed</button><button class="o" id="no">✗ No, reopen it</button></div></div>`:""}
+ <h3>Messages to you (simulated WhatsApp)</h3>${g.notifications.filter(n=>n.recipient=="citizen").map(n=>`<div class="wa">${esc(n.body)}<small>${n.ts.replace("T"," ")}</small></div>`).join("")}
+ ${last?`<button class="l sm" id="say">🔊 Read aloud</button>`:""}
+ <h3>Timeline</h3><ul class="tl">${g.audit.filter(a=>a.action.startsWith("status")||a.action.startsWith("work")).map(a=>`<li><b>${a.action.replace("status:","").replace("->"," → ")}</b> <small>${a.actor} · ${a.ts.replace("T"," ")}</small><br>${esc(a.reasoning)}</li>`).join("")}</ul>`;
+ if($("#ok")){$("#ok").onclick=()=>api(`/api/grievances/${ref}/citizen`,{action:"confirm"}).then(track);$("#no").onclick=()=>api(`/api/grievances/${ref}/citizen`,{action:"dispute"}).then(track)}
+ if($("#say"))$("#say").onclick=()=>speak(last.body,g.lang)}
+$("#track").onclick=track;
+
+function tags(g){return `${g.sensitive?'<span class="tag r">SENSITIVE · never auto-closed</span>':""}<span class="tag ${g.decision=="AUTO_PROPOSE"?"g":"o"}">${g.decision=="AUTO_PROPOSE"?"AUTO":"HUMAN REVIEW"} · ${g.rule_id}</span>
+ ${g.group_id?`<span class="tag">DUPLICATE GROUP ${g.group_id}</span>`:""}${g.rule_id=="ESC"?'<span class="tag r">SLA / RECURRENCE ALERT</span>':""}${g.reopened?'<span class="tag r">REOPENED BY CITIZEN</span>':""}`}
+async function queue(){const gs=await api("/api/grievances");$("#queue").innerHTML=gs.map(g=>`<div class="q ${g.ref==cur?"on":""}" data-r="${g.ref}"><div class="top"><span>${g.ref} · ${esc(g.category)}</span><span class="pr">P${g.priority}</span></div>
+ <p>${esc(g.location||"location missing")} · ${L[g.lang]} · ${g.status} · confidence ${g.confidence.toFixed(2)}</p>${tags(g)}</div>`).join("")||"No cases yet.";
+ document.querySelectorAll(".q").forEach(q=>q.onclick=()=>{cur=q.dataset.r;queue();detail()});if(!cur&&gs[0]){cur=gs[0].ref;queue();detail()}}
+async function detail(){const g=await api(`/api/grievances/${cur}?role=officer`),auto=g.decision=="AUTO_PROPOSE";
+ $("#detail").innerHTML=`<div class="row" style="justify-content:space-between"><h2 style="margin:0;font-size:17px">${g.ref} · ${esc(g.subcategory)}</h2><span><span class="tag">${g.status}</span><span class="tag o">Priority ${g.priority}</span></span></div>
+ <div style="margin:6px 0">${tags(g)}</div>
+ <div class="grid2"><div><div class="ai"><small>AI SUMMARY · suggestion, not verified</small><br>${esc(g.summary)}</div>
+ <h3>Citizen's words (personal data redacted)</h3><div>${esc(g.text)}</div>
+ <div class="kv" style="margin-top:8px"><span>Citizen</span><span>${esc(g.name||"not given")}</span><span>Language</span><span>${L[g.lang]}</span><span>Sentiment</span><span>${g.sentiment} <span class="unv">AI</span></span>
+ <span>Assigned to</span><span>${esc(g.department)} · ${esc(g.assignee)}</span><span>Due</span><span>${g.due.slice(0,10)} (SLA ${g.sla_days} d)</span>
+ <span>Priority inputs</span><span>severity ${g.severity} × urgency ${g.urgency} × affected ${g.affected}</span></div></div>
+ <div><div class="rule ${auto?"auto":""}"><b>Policy gate: ${auto?"AUTO-PROPOSE":"HUMAN REVIEW"} · rule ${g.rule_id}</b><br>${esc(g.reason)}</div>
+ <h3>Confidence ${g.confidence.toFixed(2)} vs threshold ${g.threshold.toFixed(2)}</h3><div class="bar"><i style="width:${g.confidence*100}%"></i><u style="left:${g.threshold*100}%"></u></div>
+ <small style="color:var(--m)">keyword ${g.confidence_parts.keyword} · classifier agrees ${g.confidence_parts.classifier_agrees} · classifier prob ${g.confidence_parts.classifier_prob} · retrieved agree ${g.confidence_parts.retrieved_agree}</small>
+ <h3>Prediction <span class="unv">AI estimate</span></h3><div class="kv"><span>SLA breach probability</span><span>${(g.sla.breach_probability*100).toFixed(0)}%</span><span>Recurring at this location</span><span>${g.sla.recurrence?"Yes":"No"} (${g.sla.similar_in_60_days} poor closures in 60 days)</span></div></div></div>
+ <h3>Retrieved similar past cases (evidence, not the decision)</h3><table class="t"><tr><th>Sim.</th><th>Past complaint</th><th>Resolution</th><th>Days</th><th>Feedback</th></tr>
+ ${g.retrieved.map(r=>`<tr><td>${r.similarity.toFixed(2)}</td><td>${esc(r.text)}</td><td>${esc(r.resolution)}</td><td>${r.days_to_resolve}</td><td>${r.feedback}</td></tr>`).join("")}</table>
+ ${g.group.length?`<h3>Duplicate group ${g.group_id}: each keeps its own reference number</h3><table class="t">${g.group.map(x=>`<tr><td><b>${x.ref}</b></td><td>${L[x.lang]}</td><td>${esc(x.text)}</td><td>${x.status}</td></tr>`).join("")}</table>`:""}
+ <h3>Agent trace ${g.langfuse&&g.langfuse.startsWith("http")?`<a href="${g.langfuse.split(" ")[0]}" target="_blank">open in Langfuse ↗</a>`:""}</h3><div class="trace">${g.trace.map(s=>`<div class="${s.span=="policy_agent"?"pg":""}"><b>${s.span}</b>${s.ms} ms</div>`).join("<span style='align-self:center;color:var(--m)'>→</span>")}</div>
+ <h3>Audit log</h3><table class="t"><tr><th>Actor</th><th>Action</th><th>Conf.</th><th>Rule</th><th>Reasoning</th></tr>${g.audit.map(a=>`<tr><td><b>${a.actor}</b></td><td>${a.action}</td><td>${a.confidence??""}</td><td>${a.rule_id??""}</td><td>${esc(a.reasoning)}</td></tr>`).join("")}</table>
+ <h3>Actions</h3><div class="row"><input id="note" placeholder="Note / resolution text"><button class="l" data-a="assign">Assign work order</button><button data-a="propose">Propose resolution</button>
+ <button class="o" data-d="1" title="Mock department webhook">Simulate dept. “work done”</button></div><div id="err" style="color:var(--r);margin-top:6px"></div>`;
+ document.querySelectorAll("#detail button").forEach(b=>b.onclick=async()=>{try{if(b.dataset.d)await api("/api/webhooks/department-callback/"+cur,{action:"done",note:$("#note").value});
+  else await api(`/api/grievances/${cur}/officer`,{action:b.dataset.a,note:$("#note").value});queue();detail()}catch(e){$("#err").textContent=e.message}})}
+
+async function admin(){const s=await api("/api/admin/stats"),e=s.eval;
+ if(e){const m=e.metrics,k=(v,l,z)=>`<div class="kpi ${z?"z":""}"><b>${v}</b>${l}</div>`;$("#evalmeta").textContent=`${e.total} adversarial test cases · run ${e.generated.replace("T"," ")}`;
+  $("#score").innerHTML=k(m.sensitive_auto_routed,"sensitive cases auto-routed",1)+k(m.cases_closed_by_ai,"cases closed by AI",1)+k(m.auto_rejections,"automatic rejections",1)+k(m.injections_succeeded,"prompt injections succeeded",1)
+  +k(m.routine_auto_handled,"routine cases auto-handled")+k(m.category_accuracy,"category accuracy")+k(m.language_detection,"language detection")+k(m.duplicates_grouped_across_languages,"cross-language duplicates grouped");
+  $("#fails").innerHTML=e.failures.length?"Known misses: "+e.failures.map(f=>`${f.id} (${f.tag}): detected ${f.detected_lang}, routed ${f.route} by ${f.rule}`).join("; ")+". "+esc(e.note):esc(e.note)}
+ else $("#score").innerHTML="Run <code>python eval/run_eval.py</code> to generate the scorecard.";
+ $("#live").innerHTML=[[s.total,"grievances"],[s.auto,"auto-routed"],[s.human,"human review"],[s.sensitive,"sensitive (all human)"],[s.groups,"duplicate groups"],[`${s.ai_reopened}/${s.ai_proposed}`,"AI proposals reopened"]].map(x=>`<div class="kpi"><b>${x[0]}</b>${x[1]}</div>`).join("");
+ $("#rules").innerHTML=Object.entries(s.rules).map(([r,n])=>`<span class="tag">${r} × ${n}</span>`).join("")||"none yet";
+ $("#fair").innerHTML="<tr><th>Language</th><th>Cases</th><th>To human</th><th>Avg priority</th></tr>"+Object.entries(s.by_lang).map(([l,b])=>`<tr><td>${L[l]}</td><td>${b.total}</td><td>${b.human}</td><td>${(b.priority/b.total).toFixed(0)}</td></tr>`).join("");
+ const mx=Math.max(...s.hotspots.map(h=>h.count),1);$("#hot").innerHTML=s.hotspots.map(h=>`<div class="hb"><span>${h.locality} · ${h.category}</span><i style="width:${h.count/mx*100}%"></i><b>${h.count}</b></div>`).join("");
+ $("#hooks").innerHTML="<tr><th>Ref</th><th>Event</th><th>Delivery</th><th>HMAC</th></tr>"+s.webhooks.slice(0,6).map(w=>`<tr><td>${w.ref}</td><td>${w.event}</td><td>${esc(w.delivery)}</td><td>${w.signature.slice(0,10)}…</td></tr>`).join("");
+ $("#audit").innerHTML="<tr><th>Ref</th><th>Actor</th><th>Action</th><th>Conf.</th><th>Reasoning</th></tr>"+s.audit.slice(0,9).map(a=>`<tr><td>${a.ref}</td><td><b>${a.actor}</b></td><td>${a.action}</td><td>${a.confidence??""}</td><td>${esc(a.reasoning)}</td></tr>`).join("");
+ $("#notes").innerHTML=s.notifications.slice(0,6).map(n=>`<div class="wa">${esc(n.body)}<small>${n.channel} → ${esc(n.recipient)} · ${n.ref}</small></div>`).join("")}
+
+function route(){const h=(location.hash||"#citizen").slice(1).split("=")[0];document.querySelectorAll("main").forEach(m=>m.classList.toggle("on",m.id==h));
+ document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.hash=="#"+h));if(h=="officer")queue();if(h=="admin")admin()}
+onhashchange=route;route();
+</script>
+</body>
+</html>
