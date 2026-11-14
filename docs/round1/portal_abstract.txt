@@ -1,23 +1,23 @@
-Nyay Setu by Setu Builders: grievance redressal you can audit. AI proposes, rules decide, citizens confirm. A working prototype is already built and public.
+Nyay Setu by Setu Builders: grievance redressal you can audit. AI proposes, rules decide, citizens confirm. Working prototype, public code, demo video and live traces: github.com/mahak867/setu-builders
 
-Problem: portals reward closing tickets, not fixing problems. DARPG found 5.01 lakh recurring grievances on CPGRAMS. A Pune resident on the PMC Care portal: "most complaints were simply closed." Most portals are English-only forms.
+Problem: portals reward closing tickets, not fixing problems. DARPG found 5.01 lakh recurring grievances on CPGRAMS. A Pune resident on PMC Care: "most complaints were simply closed." Most portals are English-only forms.
 
-Working prototype (github.com/mahak867/setu-builders), running on synthetic stand-ins for the three official datasets:
-1. Intake Agent: Marathi, Hindi, English or Hinglish chat; asks for missing details (e.g. location); the citizen confirms a structured draft (category, description, location, urgency, missing details) before submission.
-2. PII redaction before any LLM call; Identity-Hiding categories masked in the officer view.
-3. Case Memory: top-3 similar past cases shown as evidence, never as the decision.
-4. Duplicate grouping by category, location and time; every grievance keeps its own reference number.
-5. SLA breach and recurrence prediction from history; escalation alert before the deadline.
-6. Policy Gate: deterministic code reading the Category Master, 7 numbered rules. Sensitive cases always go to a human. An LLM (gpt-oss-120b via Groq) gives only a second opinion: disagreement can lower confidence, never approve a case.
-7. Action Agent: DB update, department assignment, HMAC-signed webhooks (n8n-ready), simulated WhatsApp/email in the citizen's language.
+How it works (running today on synthetic stand-ins for the three official datasets):
+1. PII redaction before any LLM call; Identity-Hiding categories masked from officers.
+2. LLM intake agent (gpt-oss-120b on Groq): reads Marathi, Hindi, English or Hinglish, asks for missing details in the citizen's language, builds a draft (category, description, location, urgency, missing details) the citizen confirms. Voice via Whisper large-v3.
+3. Independent rule reader cross-checks every case. If they disagree, confidence drops and a human decides. The LLM can only add caution; if it fails, the rules run the whole intake.
+4. Case memory: top-3 similar past cases as evidence, matched across languages via the intake agent's English translation.
+5. Duplicates grouped by category, place and time; every grievance keeps its own reference number.
+6. SLA breach and recurrence prediction; escalation to the supervisor before the deadline.
+7. Policy gate: deterministic code on the Category Master, 7 numbered rules. Sensitive cases always go to a human.
+8. Actions: database update, department assignment, HMAC-signed webhooks (n8n-ready), simulated WhatsApp/email.
 
-Every AI action is logged as AI_SYSTEM (model, confidence, timestamp, reasoning, rule ID). Every grievance has a live public Langfuse trace with 9 agent spans: intake, redaction, retrieval, duplicates, SLA, LLM, policy, action.
+Every AI action is logged as AI_SYSTEM (model, confidence, timestamp, reasoning, rule). Each grievance has a public Langfuse trace with every agent step.
 
-What is different, and measured:
-- Safety evaluation: 39 adversarial cases (hidden sensitive cases, prompt injection, code-mixed text) run through the real pipeline. Results: 0/15 sensitive cases auto-routed, 0/39 closed by AI, 0/8 injections succeeded, 8/8 routine cases auto-handled, 2/2 cross-language duplicates grouped. One known miss (a Marathi sentence detected as Hindi) is published, not hidden.
-- AI cannot close or reject: blocked in the state machine, not by a prompt. AI can only mark "Proposed resolved"; the citizen confirms or disputes, and a dispute reopens the case automatically. The AI reopen rate is shown publicly.
-- Priority = severity x urgency x affected population; duplicates raise affected population, not raw count.
+Measured, not claimed: 57 adversarial cases through the real pipeline, including 18 held-out cases written after tuning. LLM-led results: 0 sensitive cases auto-routed, 21/21 sensitive cases recognised with identity hidden, 0 closed by AI, 0/10 prompt injections succeeded. Misses are published as found: on its first held-out run the rules-only fallback let one Marathi injection through (since fixed), and the LLM sends some routine cases to a human, the safe direction. 105 automated tests run on every push.
 
-Three demo scenarios already work: a routine Marathi streetlight case auto-proposed (rule AUTO-OK), a Hindi bribe complaint held for a human with identity hidden (CM-SENS), and a recurring drain complaint escalated before its SLA (ESC).
+AI cannot close or reject: blocked in the state machine, not by a prompt. AI only marks "Proposed resolved"; the citizen confirms or disputes, and a dispute reopens the case automatically. Priority = severity x urgency x affected population, not raw volume.
 
-Next for the finale: official datasets, multilingual embeddings, server-side Marathi speech, real WhatsApp, a hotspot map.
+All three demo scenarios run in the video: a Marathi streetlight case auto-proposed (AUTO-OK), a Hindi bribe complaint held for a human with identity hidden (CM-SENS), and Marathi/English/Hindi pothole duplicates plus a recurring drain escalated before its SLA (ESC).
+
+Finale: official datasets, PostgreSQL/pgvector, multilingual embeddings, real WhatsApp, hotspot map.
