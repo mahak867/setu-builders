@@ -121,18 +121,20 @@ def history(n=420, now=None):
         cid = rnd.choices(ids, [WEIGHTS[k] for k in ids])[0]
         lang = rnd.choices(["mr", "hi", "en"], [45, 30, 25])[0]
         loc = rnd.choice(LOCALITIES)
-        text = rnd.choice(T[cid][lang]).format(loc=loc[0] if lang == "en" else loc[1])
+        i = rnd.randrange(len(T[cid][lang]))
+        text = T[cid][lang][i].format(loc=loc[0] if lang == "en" else loc[1])
+        text_en = T[cid]["en"][i].format(loc=loc[0])  # aligned English version (real data: translated once at ingestion)
         sub = now - timedelta(days=rnd.uniform(8, 150))
         c = cats[cid]
         days = max(0.3, rnd.gauss(c["sla_days"] * SLOW.get(cid, 0.7) * LOC_SLOW.get(loc[0], 1.0), c["sla_days"] * 0.35))
-        rows.append(dict(text=text, lang=lang, category_id=cid, locality=loc[0], submitted=sub.isoformat(timespec="seconds"),
+        rows.append(dict(text=text, text_en=text_en, lang=lang, category_id=cid, locality=loc[0], submitted=sub.isoformat(timespec="seconds"),
                          resolved=(sub + timedelta(days=days)).isoformat(timespec="seconds"), status="Resolved",
                          resolution=c["resolution"], feedback=rnd.choices(["Satisfied", "Not satisfied"], [78, 22])[0],
                          breached=int(days > c["sla_days"])))
     # a recurring incident so the recurrence detector has something real to find
     for d in (41, 27, 12):
         sub = now - timedelta(days=d)
-        rows.append(dict(text="तरोडा मधील गटार तुंबले आहे, सांडपाणी रस्त्यावर येत आहे.", lang="mr", category_id="CM-03", locality="Taroda",
+        rows.append(dict(text="तरोडा मधील गटार तुंबले आहे, सांडपाणी रस्त्यावर येत आहे.", text_en="The drain in Taroda is blocked and sewage is overflowing on the road.", lang="mr", category_id="CM-03", locality="Taroda",
                          submitted=sub.isoformat(timespec="seconds"), resolved=(sub + timedelta(days=6)).isoformat(timespec="seconds"),
                          status="Resolved", resolution=cats["CM-03"]["resolution"], feedback="Not satisfied", breached=1))
     return rows

@@ -2,3 +2,4 @@ nyay.db
 __pycache__/
 node_modules/
 .env
+docs/video/raw.webm

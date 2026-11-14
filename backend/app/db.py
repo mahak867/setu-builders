@@ -9,7 +9,7 @@ _local = threading.local()
 SCHEMA = """
 create table if not exists category_master(id text primary key, data text);
 create table if not exists department(name text primary key, data text);
-create table if not exists history(id integer primary key, text text, lang text, category_id text, locality text,
+create table if not exists history(id integer primary key, text text, text_en text, lang text, category_id text, locality text,
   submitted text, resolved text, status text, resolution text, feedback text, breached int);
 create table if not exists grievance(id integer primary key, ref text unique, created text, status text, data text);
 create table if not exists audit(id integer primary key, ref text, ts text, actor text, action text, model text,

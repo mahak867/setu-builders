@@ -3,7 +3,7 @@ import json
 import os
 from collections import Counter
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -66,11 +66,24 @@ def chat(c: Chat):
     return engine.chat(c.session_id, c.message)
 
 
+@app.post("/api/transcribe")
+async def transcribe(request: Request, lang: str = "mr"):
+    """Raw audio body (webm/ogg/wav/mp3). Whisper large-v3 via Groq; the browser falls back to its own recognizer on error."""
+    return engine.transcribe(await request.body(), request.headers.get("content-type", "audio/webm"), lang)
+
+
+@app.get("/api/config")
+def config():
+    return dict(llm=bool(os.environ.get("GROQ_API_KEY")), model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b") if os.environ.get("GROQ_API_KEY") else engine.RULES_MODEL,
+                server_speech=bool(os.environ.get("GROQ_API_KEY")), langfuse=bool(os.environ.get("LANGFUSE_PUBLIC_KEY")))
+
+
 @app.post("/api/grievances")
 def create(s: Submit):
     text, draft = s.text, None
     if s.session_id and s.session_id in engine.SESS:
-        text = engine.SESS.pop(s.session_id)["text"]
+        sess = engine.SESS.pop(s.session_id)
+        text, draft = sess["text"], sess.get("draft")  # submit exactly the draft the citizen confirmed
     if not text:
         raise HTTPException(400, "Nothing to submit")
     return engine.submit(text, s.name, s.phone, draft)
@@ -125,13 +138,19 @@ def stats():
         b["human"] += g["decision"] == "HUMAN_REVIEW"
         b["priority"] += g["priority"]
     hot = Counter((h["locality"], h["category_id"]) for h in engine.M["hist"] if h["feedback"] == "Not satisfied" or h["breached"])
-    rep = os.path.join(ROOT, "eval", "report.json")
+    reports = {}
+    for name in ("cases_llm", "cases_rules", "holdout_llm_firstrun", "holdout_rules_firstrun", "holdout_llm", "holdout_rules"):
+        f = os.path.join(ROOT, "eval", f"report_{name}.json")
+        if os.path.exists(f):
+            r = json.load(open(f, encoding="utf-8"))
+            reports[name] = dict(metrics=r["metrics"], total=r["total"], mode=r.get("mode"), generated=r["generated"], note=r["note"],
+                                 failures=[{k: x[k] for k in ("id", "tag", "route", "rule", "detected_lang")} for x in r["failures"]])
     return dict(total=len(gs), auto=sum(g["decision"] == "AUTO_PROPOSE" for g in gs), human=sum(g["decision"] == "HUMAN_REVIEW" for g in gs),
                 sensitive=sum(g["sensitive"] for g in gs), sensitive_closed_by_ai=0, groups=len({g["group_id"] for g in gs if g.get("group_id")}),
                 escalations=sum(g["rule_id"] == "ESC" for g in gs), ai_proposed=len(ai_proposed), ai_reopened=len(reopened),
                 rules=Counter(g["rule_id"] for g in gs), by_lang=by_lang,
                 hotspots=[dict(locality=k[0], category=engine.M["cats"][k[1]]["category"], count=v) for k, v in hot.most_common(8)],
-                eval=json.load(open(rep, encoding="utf-8")) if os.path.exists(rep) else None,
+                reports=reports,
                 notifications=db.q("select * from notification order by id desc limit 12"),
                 webhooks=db.q("select * from webhook order by id desc limit 12"),
                 audit=db.q("select * from audit order by id desc limit 15"))

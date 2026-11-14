@@ -42,7 +42,7 @@ table.t{width:100%;border-collapse:collapse;font-size:12.5px}table.t td,table.t 
 </style>
 </head>
 <body>
-<header><b>न्याय सेतू · Nyay Setu</b><small>AI proposes · Rules decide · Citizens confirm</small>
+<header><b>न्याय सेतू · Nyay Setu</b><small>AI proposes · Rules decide · Citizens confirm</small><span class="tag" id="eng" style="background:#fff2;color:#fff"></span>
 <nav><a href="#citizen">Citizen</a><a href="#officer">Officer queue</a><a href="#admin">Admin &amp; safety</a></nav></header>
 <div class="banner">Prototype on synthetic data. AI outputs are suggestions, not verified facts. No case can be rejected or closed by the AI.</div>
 
@@ -96,8 +96,18 @@ async function send(){const m=$("#msg").value.trim();if(!m)return;$("#msg").valu
   add(`Submitted. Reference <b>${g.ref}</b>.`,"msg bot");$("#ref").value=g.ref;track()};
  c.querySelector(".l").onclick=()=>$("#msg").focus()}}
 $("#send").onclick=send;$("#msg").onkeydown=e=>e.key=="Enter"&&send();
-$("#mic").onclick=()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){alert("Voice input needs Chrome or Edge. You can type instead.");return}
- const r=new R();r.lang=$("#lang").value;r.onresult=e=>{$("#msg").value=e.results[0][0].transcript};r.start()};
+let rec=null,chunks=[];
+function browserSTT(){const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){alert("Voice needs a microphone. You can type instead.");return}
+ const r=new R();r.lang=$("#lang").value;r.onresult=e=>{$("#msg").value=e.results[0][0].transcript};r.start()}
+$("#mic").onclick=async()=>{ // server-side Whisper (any browser); falls back to the browser recognizer
+ if(rec){rec.stop();return}
+ if(!CFG.server_speech||!navigator.mediaDevices){browserSTT();return}
+ let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){browserSTT();return}
+ rec=new MediaRecorder(st);chunks=[];rec.ondataavailable=e=>chunks.push(e.data);
+ rec.onstop=async()=>{st.getTracks().forEach(t=>t.stop());$("#mic").textContent="…";const b=new Blob(chunks,{type:rec.mimeType});rec=null;
+  const r=await fetch("/api/transcribe?lang="+$("#lang").value.slice(0,2),{method:"POST",headers:{"Content-Type":b.type},body:b}).then(r=>r.json()).catch(()=>({error:1}));
+  $("#mic").textContent="🎤";if(r.text){$("#msg").value=r.text;$("#msg").focus()}else browserSTT()};
+ rec.start();$("#mic").textContent="■ stop"};
 function speak(t,l){const u=new SpeechSynthesisUtterance(t);u.lang={mr:"mr-IN",hi:"hi-IN",en:"en-IN"}[l];speechSynthesis.speak(u)}
 async function track(){const ref=$("#ref").value.trim();if(!ref)return;let g;try{g=await api("/api/grievances/"+ref)}catch(e){$("#trackout").textContent=e.message;return}
  const last=g.notifications.filter(n=>n.recipient=="citizen").slice(-1)[0];
@@ -127,10 +137,13 @@ async function detail(){const g=await api(`/api/grievances/${cur}?role=officer`)
  <span>Priority inputs</span><span>severity ${g.severity} × urgency ${g.urgency} × affected ${g.affected}</span></div></div>
  <div><div class="rule ${auto?"auto":""}"><b>Policy gate: ${auto?"AUTO-PROPOSE":"HUMAN REVIEW"} · rule ${g.rule_id}</b><br>${esc(g.reason)}</div>
  <h3>Confidence ${g.confidence.toFixed(2)} vs threshold ${g.threshold.toFixed(2)}</h3><div class="bar"><i style="width:${g.confidence*100}%"></i><u style="left:${g.threshold*100}%"></u></div>
- <small style="color:var(--m)">keyword ${g.confidence_parts.keyword} · classifier agrees ${g.confidence_parts.classifier_agrees} · classifier prob ${g.confidence_parts.classifier_prob} · retrieved agree ${g.confidence_parts.retrieved_agree}</small>
+ <small style="color:var(--m)">${Object.entries(g.confidence_parts).map(([k,v])=>k.replaceAll("_"," ")+" "+v).join(" · ")}</small>
+ <h3>Intake agents <span class="unv">AI</span></h3><div class="kv"><span>Engine</span><span>${esc(g.engine||"rules")} · ${esc(g.model||"")}</span>
+ ${g.trace.find(t=>t.span=="intake_agent")&&g.confidence_parts.llm_rules_agree!==undefined?`<span>Cross-check</span><span>LLM and rules ${g.confidence_parts.llm_rules_agree?"<b style='color:var(--g)'>agree</b>":"<b style='color:var(--r)'>disagree → confidence lowered</b>"}</span>`:""}
+ ${g.english?`<span>English (AI translation)</span><span>${esc(g.english)}</span>`:""}</div>
  <h3>Prediction <span class="unv">AI estimate</span></h3><div class="kv"><span>SLA breach probability</span><span>${(g.sla.breach_probability*100).toFixed(0)}%</span><span>Recurring at this location</span><span>${g.sla.recurrence?"Yes":"No"} (${g.sla.similar_in_60_days} poor closures in 60 days)</span></div></div></div>
- <h3>Retrieved similar past cases (evidence, not the decision)</h3><table class="t"><tr><th>Sim.</th><th>Past complaint</th><th>Resolution</th><th>Days</th><th>Feedback</th></tr>
- ${g.retrieved.map(r=>`<tr><td>${r.similarity.toFixed(2)}</td><td>${esc(r.text)}</td><td>${esc(r.resolution)}</td><td>${r.days_to_resolve}</td><td>${r.feedback}</td></tr>`).join("")}</table>
+ <h3>Retrieved similar past cases (evidence, not the decision)</h3><table class="t"><tr><th>Sim.</th><th>Lang</th><th>Past complaint</th><th>Resolution</th><th>Days</th><th>Feedback</th></tr>
+ ${g.retrieved.map(r=>`<tr><td>${r.similarity.toFixed(2)}</td><td>${L[r.lang]||""}${r.matched_on=="english"?' <span class="tag">cross-language</span>':""}</td><td>${esc(r.text)}</td><td>${esc(r.resolution)}</td><td>${r.days_to_resolve}</td><td>${r.feedback}</td></tr>`).join("")}</table>
  ${g.group.length?`<h3>Duplicate group ${g.group_id}: each keeps its own reference number</h3><table class="t">${g.group.map(x=>`<tr><td><b>${x.ref}</b></td><td>${L[x.lang]}</td><td>${esc(x.text)}</td><td>${x.status}</td></tr>`).join("")}</table>`:""}
  <h3>Agent trace ${g.langfuse&&g.langfuse.startsWith("http")?`<a href="${g.langfuse.split(" ")[0]}" target="_blank">open in Langfuse ↗</a>`:""}</h3><div class="trace">${g.trace.map(s=>`<div class="${s.span=="policy_agent"?"pg":""}"><b>${s.span}</b>${s.ms} ms</div>`).join("<span style='align-self:center;color:var(--m)'>→</span>")}</div>
  <h3>Audit log</h3><table class="t"><tr><th>Actor</th><th>Action</th><th>Conf.</th><th>Rule</th><th>Reasoning</th></tr>${g.audit.map(a=>`<tr><td><b>${a.actor}</b></td><td>${a.action}</td><td>${a.confidence??""}</td><td>${a.rule_id??""}</td><td>${esc(a.reasoning)}</td></tr>`).join("")}</table>
@@ -139,11 +152,15 @@ async function detail(){const g=await api(`/api/grievances/${cur}?role=officer`)
  document.querySelectorAll("#detail button").forEach(b=>b.onclick=async()=>{try{if(b.dataset.d)await api("/api/webhooks/department-callback/"+cur,{action:"done",note:$("#note").value});
   else await api(`/api/grievances/${cur}/officer`,{action:b.dataset.a,note:$("#note").value});queue();detail()}catch(e){$("#err").textContent=e.message}})}
 
-async function admin(){const s=await api("/api/admin/stats"),e=s.eval;
- if(e){const m=e.metrics,k=(v,l,z)=>`<div class="kpi ${z?"z":""}"><b>${v}</b>${l}</div>`;$("#evalmeta").textContent=`${e.total} adversarial test cases · run ${e.generated.replace("T"," ")}`;
+async function admin(){const s=await api("/api/admin/stats"),R=s.reports||{},e=R.cases_llm||R.cases_rules;
+ if(e){const m=e.metrics,k=(v,l,z)=>`<div class="kpi ${z?"z":""}"><b>${v}</b>${l}</div>`;$("#evalmeta").textContent=`${e.total} adversarial dev cases · ${e.mode=="llm"?"LLM-led intake":"rules only"} · run ${e.generated.replace("T"," ")}`;
   $("#score").innerHTML=k(m.sensitive_auto_routed,"sensitive cases auto-routed",1)+k(m.cases_closed_by_ai,"cases closed by AI",1)+k(m.auto_rejections,"automatic rejections",1)+k(m.injections_succeeded,"prompt injections succeeded",1)
   +k(m.routine_auto_handled,"routine cases auto-handled")+k(m.category_accuracy,"category accuracy")+k(m.language_detection,"language detection")+k(m.duplicates_grouped_across_languages,"cross-language duplicates grouped");
-  $("#fails").innerHTML=e.failures.length?"Known misses: "+e.failures.map(f=>`${f.id} (${f.tag}): detected ${f.detected_lang}, routed ${f.route} by ${f.rule}`).join("; ")+". "+esc(e.note):esc(e.note)}
+  const cols=[["cases_llm","Dev set (39) · LLM-led"],["cases_rules","Dev set · rules fallback"],["holdout_llm","Held-out (18) · LLM-led"],["holdout_rules","Held-out · rules fallback"]].filter(c=>R[c[0]]);
+  const rows=[["sensitive_auto_routed","Sensitive auto-routed"],["sensitive_recognised","Sensitive recognised (identity hidden)"],["cases_closed_by_ai","Closed by AI"],["injections_succeeded","Injections succeeded"],["routine_auto_handled","Routine auto-handled"],["route_accuracy","Route accuracy"]];
+  const fr=R.holdout_rules_firstrun;
+  $("#fails").innerHTML=`<table class="t" style="margin-top:6px"><tr><th></th>${cols.map(c=>`<th>${c[1]}</th>`).join("")}</tr>${rows.map(r=>`<tr><td>${r[1]}</td>${cols.map(c=>`<td>${R[c[0]].metrics[r[0]]??"–"}</td>`).join("")}</tr>`).join("")}</table>
+  <div style="margin-top:6px">Held-out cases were written after tuning.${fr?` On its first run the rules fallback let ${fr.metrics.injections_succeeded} injections through; that gap was fixed and the set re-run.`:""} The LLM-led intake recognises every sensitive case; the rules fallback misses several (they still reach a human, without identity hiding). ${esc(e.note)}</div>`}
  else $("#score").innerHTML="Run <code>python eval/run_eval.py</code> to generate the scorecard.";
  $("#live").innerHTML=[[s.total,"grievances"],[s.auto,"auto-routed"],[s.human,"human review"],[s.sensitive,"sensitive (all human)"],[s.groups,"duplicate groups"],[`${s.ai_reopened}/${s.ai_proposed}`,"AI proposals reopened"]].map(x=>`<div class="kpi"><b>${x[0]}</b>${x[1]}</div>`).join("");
  $("#rules").innerHTML=Object.entries(s.rules).map(([r,n])=>`<span class="tag">${r} × ${n}</span>`).join("")||"none yet";
@@ -155,6 +172,7 @@ async function admin(){const s=await api("/api/admin/stats"),e=s.eval;
 
 function route(){const h=(location.hash||"#citizen").slice(1).split("=")[0];document.querySelectorAll("main").forEach(m=>m.classList.toggle("on",m.id==h));
  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.hash=="#"+h));if(h=="officer")queue();if(h=="admin")admin()}
+let CFG={};fetch("/api/config").then(r=>r.json()).then(c=>{CFG=c;$("#eng").textContent=c.llm?"LLM intake: "+c.model+" + rules cross-check":"Rules-only mode (no LLM key)"});
 onhashchange=route;route();
 </script>
 </body>

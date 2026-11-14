@@ -15,13 +15,13 @@ const post = (u, b) => fetch(B + u, { method: 'POST', headers: { 'Content-Type':
   await p.goto(B + '/#citizen');
   await p.fill('#msg', 'आमच्या घरासमोरील पथदिवा चार दिवसांपासून बंद आहे, रात्री खूप अंधार असतो.');
   await p.click('#send');
-  await p.waitForSelector('.msg.bot:nth-of-type(3)');
+  await p.waitForSelector('.msg.bot:nth-of-type(3)', { timeout: 60000 });
   await p.fill('#msg', 'भाग्य नगर, हनुमान मंदिराजवळ');
   await p.click('#send');
-  await p.waitForSelector('.draft');
+  await p.waitForSelector('.draft', { timeout: 60000 });
   await shot('1_citizen_chat_draft');
   await p.click('.draft .g');
-  await p.waitForSelector('#trackout .wa');
+  await p.waitForSelector('#trackout .wa', { timeout: 60000 });
   const ref1 = await p.inputValue('#ref');
 
   // Scenario 2: sensitive Hindi complaint; 3: recurrence escalation; duplicates in three languages; others
