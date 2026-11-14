@@ -1,6 +1,6 @@
 Nyay Setu by Setu Builders: grievance redressal you can audit. AI proposes, rules decide, citizens confirm. Working prototype, public code, demo video and live traces: github.com/mahak867/setu-builders
 
-Problem: portals reward closing tickets, not fixing problems. DARPG found 5.01 lakh recurring grievances on CPGRAMS. A Pune resident on PMC Care: "most complaints were simply closed." Most portals are English-only forms.
+Problem: portals reward closing tickets, not fixing problems. DARPG's own reports show the same problems recurring: over 5.01 lakh grievances in just ten categories during 2022-25. A Pune resident on PMC Care (Free Press Journal, June 2026): "most complaints were simply closed."
 
 How it works (running today on synthetic stand-ins for the three official datasets):
 1. PII redaction before any LLM call; Identity-Hiding categories masked from officers.
@@ -10,7 +10,7 @@ How it works (running today on synthetic stand-ins for the three official datase
 5. Duplicates grouped by category, place and time; every grievance keeps its own reference number.
 6. SLA breach and recurrence prediction; escalation to the supervisor before the deadline.
 7. Policy gate: deterministic code on the Category Master, 7 numbered rules. Sensitive cases always go to a human.
-8. Actions: database update, department assignment, HMAC-signed webhooks (n8n-ready), simulated WhatsApp/email.
+8. Actions: database update, department assignment, HMAC-signed webhooks (n8n-ready), WhatsApp/email messages (simulated in the prototype).
 
 Every AI action is logged as AI_SYSTEM (model, confidence, timestamp, reasoning, rule). Each grievance has a public Langfuse trace with every agent step.
 
