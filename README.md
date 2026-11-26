@@ -81,8 +81,7 @@ The organisers say final judging uses fresh, unseen scenarios, which is what the
 | Category accuracy | 16/16 | 15/16 | 9/9 | 9/9 |
 
 Every miss is in the safe direction: a routine case sent to a human. Without the LLM, some sensitive cases still reach a
-human but without identity protection; those are recorded as expected failures in the tests. The earlier evaluation on our
-own synthetic data is kept in `eval/archive_synthetic_data/`.
+human but without identity protection; those are recorded as expected failures in the tests.
 
 **Tests:** 128 automated tests (`backend/tests`): data loading and validation, the CSV swap, every policy rule and every
 sensitive category, the state machine, redaction, LLM-output validation with a fake LLM, suggested duplicate groups and
@@ -139,4 +138,3 @@ The dataset guide's suggested endpoints are available: `GET /api/categories`, `G
 - `backend/app/data.py` loader and validation · `engine.py` agents, policy gate, state machine, actions, tracing · `main.py` API
 - `backend/tests/` automated tests · `eval/` test sets, runner and reports
 - `frontend/index.html` citizen, officer and admin screens
-- `docs/demo_video.js`, `docs/demo_shots.js` replay the demo scenarios · `docs/round1/` Round 1 deck, PDF and abstract
