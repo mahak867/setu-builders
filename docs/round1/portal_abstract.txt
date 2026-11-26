@@ -1,10 +1,10 @@
 Nyay Setu by Setu Builders: grievance redressal for Nanded district that you can audit. AI proposes, rules decide, citizens confirm. A working prototype already runs on the official HackFusion 4.0 dataset; code, demo video and live traces: github.com/mahak867/setu-builders
 
-Problem: portals reward closing tickets, not fixing problems. DARPG's own reports show the same problems recurring: over 5.01 lakh grievances in just ten categories during 2022-25. A Pune resident on PMC Care (Free Press Journal, June 2026): "most complaints were simply closed."
+Problem: portals reward closing tickets, not fixing problems. DARPG's own reports show the same problems recurring: over 5.01 lakh grievances in just ten categories during 2022-25. A Pune resident on PMC Care (Free Press Journal): "most complaints were simply closed."
 
 How it works:
 1. PII redaction before any LLM call.
-2. LLM intake agent (gpt-oss-120b on Groq) reads Marathi, Hindi, English or Hinglish, asks for missing details in the citizen's language and builds a draft (category, description, location, urgency, missing details) the citizen confirms. Voice via Whisper large-v3.
+2. LLM intake agent (open-weight gpt-oss-120b, self-hostable) reads Marathi, Hindi, English or Hinglish, asks for missing details in the citizen's language and builds a draft (category, description, location, urgency, missing details) the citizen confirms. Voice via Whisper large-v3.
 3. An independent rule reader cross-checks every case. If they disagree, confidence drops and a human decides; the LLM can only add caution, and if it fails the rules run everything.
 4. Case memory: top-3 similar official past cases (GRV-...) as evidence, using multilingual embeddings because the history is English and complaints are not.
 5. Duplicates by category, place, time and meaning become a suggested incident group an officer confirms; every grievance keeps its own reference number.
