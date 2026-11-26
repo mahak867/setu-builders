@@ -42,9 +42,9 @@ table.t{width:100%;border-collapse:collapse;font-size:12.5px}table.t td,table.t 
 </style>
 </head>
 <body>
-<header><b>न्याय सेतू · Nyay Setu</b><small>AI proposes · Rules decide · Citizens confirm</small><span class="tag" id="eng" style="background:#fff2;color:#fff"></span>
+<header><b>न्याय सेतू · Nyay Setu</b><small>Nanded District · AI proposes · Rules decide · Citizens confirm</small><span class="tag" id="eng" style="background:#fff2;color:#fff"></span>
 <nav><a href="#citizen">Citizen</a><a href="#officer">Officer queue</a><a href="#admin">Admin &amp; safety</a></nav></header>
-<div class="banner">Prototype on synthetic data. AI outputs are suggestions, not verified facts. No case can be rejected or closed by the AI.</div>
+<div class="banner">Prototype on the official HackFusion 4.0 synthetic dataset (Nanded district). AI outputs are suggestions, not verified facts. No case can be rejected or closed by the AI.</div>
 
 <main id="citizen">
  <section class="card"><h2>Tell us your problem · आपली तक्रार सांगा · अपनी शिकायत बताएं</h2>
@@ -67,8 +67,8 @@ table.t{width:100%;border-collapse:collapse;font-size:12.5px}table.t td,table.t 
 <main id="admin">
  <section class="card full"><h2>Safety scorecard <span style="font-weight:400;color:var(--m)" id="evalmeta"></span></h2><div class="kpis" id="score"></div><div id="fails" style="margin-top:8px;font-size:12.5px;color:var(--m)"></div></section>
  <section class="card"><h2>Live system</h2><div class="kpis" id="live" style="grid-template-columns:repeat(3,1fr)"></div>
-  <h3>Policy rules applied</h3><div id="rules"></div><h3>Routing by language (fairness check)</h3><table class="t" id="fair"></table></section>
- <section class="card"><h2>Recurring-problem hotspots <span style="font-weight:400;color:var(--m)">late or unsatisfied closures, mock history</span></h2><div id="hot"></div>
+  <h3>Official dataset (HackFusion 4.0)</h3><div id="dh" style="font-size:12.5px"></div><h3>Policy rules applied</h3><div id="rules"></div><h3>Routing by language (fairness check)</h3><table class="t" id="fair"></table></section>
+ <section class="card"><h2>Recurring-problem hotspots <span style="font-weight:400;color:var(--m)">Nanded district talukas · late or unsatisfied closures, official mock history</span></h2><div id="hot"></div>
   <h3>Webhooks dispatched</h3><table class="t" id="hooks"></table></section>
  <section class="card"><h2>Audit log <span style="font-weight:400;color:var(--m)">every AI action under AI_SYSTEM</span></h2><table class="t" id="audit"></table></section>
  <section class="card"><h2>Notifications sent (simulated)</h2><div id="notes"></div></section>
@@ -79,8 +79,8 @@ const $=s=>document.querySelector(s),api=(u,b)=>fetch(u,b?{method:"POST",headers
 const esc=s=>String(s??"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 let sid="s"+Date.now(),cur=null;
 const L={mr:"मराठी",hi:"हिन्दी",en:"English"};
-const SAMPLES=[["मराठी · पथदिवा","भाग्य नगर मधील पथदिवा चार दिवसांपासून बंद आहे, रात्री खूप अंधार असतो."],["हिन्दी · रिश्वत","वजीराबाद कार्यालय का बाबू मेरी फाइल आगे बढ़ाने के लिए रिश्वत मांग रहा है। मेरा नाम गुप्त रखें।"],
-["मराठी · गटार","तरोडा मधील गटार पुन्हा तुंबले आहे, सांडपाणी रस्त्यावर येत आहे."],["English · no location","The streetlight outside my house is not working."],["English · potholes","Huge potholes on the main road in Itwara, two bikes fell yesterday."]];
+const SAMPLES=[["मराठी · पथदिवा","भोकर शहर मधील पथदिवा चार दिवसांपासून बंद आहे, रात्री खूप अंधार असतो."],["हिन्दी · रिश्वत","वजीराबाद कार्यालय का बाबू राशन कार्ड के लिए रिश्वत मांग रहा है। मेरा नाम गुप्त रखें।"],
+["मराठी · कचरा","पाथरड येथे पुन्हा कचरा उचलला नाही, घंटागाडी आलीच नाही."],["English · harassment","A man follows and harasses women near the Kinwat bus stand every evening."],["English · no location","The streetlight outside my house is not working."],["English · potholes","Huge potholes on the main road in Itwara, two bikes fell yesterday."]];
 $("#samples").innerHTML=SAMPLES.map((s,i)=>`<button data-i="${i}">${s[0]}</button>`).join("");
 $("#samples").onclick=e=>{if(e.target.dataset.i){$("#msg").value=SAMPLES[e.target.dataset.i][1]}};
 function add(html,cls){const d=document.createElement("div");d.className=cls;d.innerHTML=html;$("#chat").append(d);$("#chat").scrollTop=1e6;return d}
@@ -112,7 +112,7 @@ function speak(t,l){const u=new SpeechSynthesisUtterance(t);u.lang={mr:"mr-IN",h
 async function track(){const ref=$("#ref").value.trim();if(!ref)return;let g;try{g=await api("/api/grievances/"+ref)}catch(e){$("#trackout").textContent=e.message;return}
  const last=g.notifications.filter(n=>n.recipient=="citizen").slice(-1)[0];
  $("#trackout").innerHTML=`<div class="row" style="justify-content:space-between"><b style="font-size:16px">${g.ref}</b><span class="tag ${g.status=="Closed"?"g":g.status=="Reopened"?"r":"o"}">${g.status}</span></div>
- <div class="kv" style="margin:8px 0"><span>Category</span><span>${esc(g.category)}</span><span>Department</span><span>${esc(g.department)}</span><span>Due by</span><span>${g.due.slice(0,10)}</span>
+ <div class="kv" style="margin:8px 0"><span>Category</span><span>${esc(g.category)}</span><span>Place</span><span>${esc(g.location||"not given")}${g.taluka&&g.taluka!=g.location?`, ${esc(g.taluka)} taluka`:""}</span><span>Department</span><span>${esc(g.department)}</span><span>Due by</span><span>${g.due.slice(0,10)}</span>
  ${g.group_id?`<span>Related reports</span><span>${g.group.length} in incident ${g.group_id} (your reference stays separate)</span>`:""}</div>
  ${g.status=="Proposed resolved"?`<div class="rule"><b>Is your problem fixed?</b><br>${esc(g.resolution)}<div class="row" style="margin-top:8px"><button class="g" id="ok">✓ Yes, it is fixed</button><button class="o" id="no">✗ No, reopen it</button></div></div>`:""}
  <h3>Messages to you (simulated WhatsApp)</h3>${g.notifications.filter(n=>n.recipient=="citizen").map(n=>`<div class="wa">${esc(n.body)}<small>${n.ts.replace("T"," ")}</small></div>`).join("")}
@@ -141,11 +141,12 @@ async function detail(){const g=await api(`/api/grievances/${cur}?role=officer`)
  <h3>Intake agents <span class="unv">AI</span></h3><div class="kv"><span>Engine</span><span>${esc(g.engine||"rules")} · ${esc(g.model||"")}</span>
  ${g.trace.find(t=>t.span=="intake_agent")&&g.confidence_parts.llm_rules_agree!==undefined?`<span>Cross-check</span><span>LLM and rules ${g.confidence_parts.llm_rules_agree?"<b style='color:var(--g)'>agree</b>":"<b style='color:var(--r)'>disagree → confidence lowered</b>"}</span>`:""}
  ${g.english?`<span>English (AI translation)</span><span>${esc(g.english)}</span>`:""}</div>
- <h3>Prediction <span class="unv">AI estimate</span></h3><div class="kv"><span>SLA breach probability</span><span>${(g.sla.breach_probability*100).toFixed(0)}%</span><span>Recurring at this location</span><span>${g.sla.recurrence?"Yes":"No"} (${g.sla.similar_in_60_days} poor closures in 60 days)</span></div></div></div>
- <h3>Retrieved similar past cases (evidence, not the decision)</h3><table class="t"><tr><th>Sim.</th><th>Lang</th><th>Past complaint</th><th>Resolution</th><th>Days</th><th>Feedback</th></tr>
- ${g.retrieved.map(r=>`<tr><td>${r.similarity.toFixed(2)}</td><td>${L[r.lang]||""}${r.matched_on=="english"?' <span class="tag">cross-language</span>':""}</td><td>${esc(r.text)}</td><td>${esc(r.resolution)}</td><td>${r.days_to_resolve}</td><td>${r.feedback}</td></tr>`).join("")}</table>
- ${g.group.length?`<h3>Duplicate group ${g.group_id}: each keeps its own reference number</h3><table class="t">${g.group.map(x=>`<tr><td><b>${x.ref}</b></td><td>${L[x.lang]}</td><td>${esc(x.text)}</td><td>${x.status}</td></tr>`).join("")}</table>`:""}
- <h3>Agent trace ${g.langfuse&&g.langfuse.startsWith("http")?`<a href="${g.langfuse.split(" ")[0]}" target="_blank">open in Langfuse ↗</a>`:""}</h3><div class="trace">${g.trace.map(s=>`<div class="${s.span=="policy_agent"?"pg":""}"><b>${s.span}</b>${s.ms} ms</div>`).join("<span style='align-self:center;color:var(--m)'>→</span>")}</div>
+ <h3>Prediction <span class="unv">AI estimate</span></h3><div class="kv"><span>SLA breach probability</span><span>${(g.sla.breach_probability*100).toFixed(0)}%</span><span>Recurring at this location</span><span>${g.sla.recurrence?"Yes":"No"} (${g.sla.poor_outcomes_here} late, unsatisfied or overdue in ${g.sla.window_days||60} days)</span></div></div></div>
+ <h3>Retrieved similar past cases (evidence, not the decision)</h3><table class="t"><tr><th>Sim.</th><th>Official case</th><th>Past complaint (official history)</th><th>Resolution</th><th>Days</th><th>Feedback</th></tr>
+ ${g.retrieved.map(r=>`<tr><td>${r.similarity.toFixed(2)}</td><td><b>${r.grievance_id||""}</b><br><span class="tag">${esc(r.category_id)}</span>${g.lang!=r.lang?' <span class="tag">cross-language</span>':""}</td><td>${esc(r.text)}<br><small style="color:var(--m)">${esc(r.locality||"")}, ${esc(r.taluka||"")} · ${esc(r.status||"")}</small></td><td>${esc(r.resolution)}</td><td>${r.days_to_resolve}</td><td>${r.feedback}</td></tr>`).join("")}</table>
+ ${g.group.length?`<h3>${g.group_status=="confirmed"?"Confirmed":g.group_status=="rejected"?"Rejected":"Suggested"} incident group ${g.group_id}: each keeps its own reference number</h3>
+ ${g.group_status=="suggested"?`<div class="row" style="margin-bottom:6px"><span style="color:var(--m)">AI suggestion. Officer decides:</span><button class="g sm" data-a="confirm_group">✓ Confirm group</button><button class="l sm" data-a="reject_group">✗ Not the same incident</button></div>`:""}<table class="t">${g.group.map(x=>`<tr><td><b>${x.ref}</b></td><td>${L[x.lang]}</td><td>${esc(x.text)}</td><td>${x.status}</td></tr>`).join("")}</table>`:""}
+ <h3>Agent trace ${g.langfuse&&g.langfuse.startsWith("http")?`<a href="${g.langfuse.split(" ")[0]}" target="_blank">open in Langfuse ↗</a> <span class="tag ${g.trace_visibility=="public"?"g":"r"}">${g.trace_visibility=="public"?"public trace · locality masked":"restricted trace · sensitive"}</span>`:""}</h3><div class="trace">${g.trace.map(s=>`<div class="${s.span=="policy_agent"?"pg":""}"><b>${s.span}</b>${s.ms} ms</div>`).join("<span style='align-self:center;color:var(--m)'>→</span>")}</div>
  <h3>Audit log</h3><table class="t"><tr><th>Actor</th><th>Action</th><th>Conf.</th><th>Rule</th><th>Reasoning</th></tr>${g.audit.map(a=>`<tr><td><b>${a.actor}</b></td><td>${a.action}</td><td>${a.confidence??""}</td><td>${a.rule_id??""}</td><td>${esc(a.reasoning)}</td></tr>`).join("")}</table>
  <h3>Actions</h3><div class="row"><input id="note" placeholder="Note / resolution text"><button class="l" data-a="assign">Assign work order</button><button data-a="propose">Propose resolution</button>
  <button class="o" data-d="1" title="Mock department webhook">Simulate dept. “work done”</button></div><div id="err" style="color:var(--r);margin-top:6px"></div>`;
@@ -163,6 +164,7 @@ async function admin(){const s=await api("/api/admin/stats"),R=s.reports||{},e=R
   <div style="margin-top:6px">Held-out cases were written after tuning.${fr?` On its first run the rules fallback let ${fr.metrics.injections_succeeded} injections through; that gap was fixed and the set re-run.`:""} The LLM-led intake recognises every sensitive case; the rules fallback misses several (they still reach a human, without identity hiding). ${esc(e.note)}</div>`}
  else $("#score").innerHTML="Run <code>python eval/run_eval.py</code> to generate the scorecard.";
  $("#live").innerHTML=[[s.total,"grievances"],[s.auto,"auto-routed"],[s.human,"human review"],[s.sensitive,"sensitive (all human)"],[s.groups,"duplicate groups"],[`${s.ai_reopened}/${s.ai_proposed}`,"AI proposals reopened"]].map(x=>`<div class="kpi"><b>${x[0]}</b>${x[1]}</div>`).join("");
+ const D=s.data||{};$("#dh").innerHTML=D.categories?`${D.categories} categories (${D.sensitive_categories} sensitive, ${D.identity_hiding_categories} identity-hiding) · ${D.departments} departments · ${D.history} past grievances · ${D.talukas} talukas · data check: <b style="color:${D.ok?"var(--g)":"var(--r)"}">${D.ok?"passed":D.issues.length+" issues"}</b> · embeddings: ${esc(s.embedding_model||"off (TF-IDF fallback)")}`:"";
  $("#rules").innerHTML=Object.entries(s.rules).map(([r,n])=>`<span class="tag">${r} × ${n}</span>`).join("")||"none yet";
  $("#fair").innerHTML="<tr><th>Language</th><th>Cases</th><th>To human</th><th>Avg priority</th></tr>"+Object.entries(s.by_lang).map(([l,b])=>`<tr><td>${L[l]}</td><td>${b.total}</td><td>${b.human}</td><td>${(b.priority/b.total).toFixed(0)}</td></tr>`).join("");
  const mx=Math.max(...s.hotspots.map(h=>h.count),1);$("#hot").innerHTML=s.hotspots.map(h=>`<div class="hb"><span>${h.locality} · ${h.category}</span><i style="width:${h.count/mx*100}%"></i><b>${h.count}</b></div>`).join("");

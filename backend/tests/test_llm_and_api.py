@@ -7,13 +7,14 @@ from fastapi.testclient import TestClient
 from app import engine
 
 BRIBE = "वजीराबाद कार्यालय का बाबू मेरी फाइल आगे बढ़ाने के लिए रिश्वत मांग रहा है।"
-LIGHT = "भाग्य नगर मधील पथदिवा चार दिवसांपासून बंद आहे."
+LIGHT = "Two streetlights on the lane near Itwara are switched off."
+HARASS = "A man follows and harasses women near the Kinwat bus stand every evening."
 
 
 def fake_llm(monkeypatch, **over):
-    base = dict(model="fake-llm", lang="mr", category_id="CM-01", locality="Bhagya Nagar", urgency=2, affected=1, sentiment="neutral",
+    base = dict(model="fake-llm", lang="mr", category_id="C009", locality="Itwara", urgency=2, affected=1, sentiment="neutral",
                 missing=[], possibly_sensitive=False, sensitive_reason=None, contains_instructions=False,
-                english="The streetlight in Bhagya Nagar has been off for four days.", summary="Streetlight off in Bhagya Nagar.", follow_up=None)
+                english="Two streetlights on the lane near Itwara are switched off.", summary="Streetlights off in Itwara.", follow_up=None)
     base.update(over)
     monkeypatch.setenv("GROQ_API_KEY", "fake")
     monkeypatch.setattr(engine, "llm_intake", lambda text: dict(base))
@@ -43,14 +44,20 @@ def test_llm_led_routine_case(monkeypatch):
 
 # ---------------------------------------------------------------- the LLM can only add caution
 def test_llm_cannot_downgrade_a_sensitive_case(monkeypatch):
-    fake_llm(monkeypatch, category_id="CM-01", lang="hi")  # LLM wrongly says "streetlight"
+    fake_llm(monkeypatch, category_id="C009", lang="en", locality="Kinwat")  # LLM wrongly says "streetlight"
+    g = engine.submit(HARASS)
+    assert g["category_id"] == "C017" and g["decision"] == "HUMAN_REVIEW" and g["rule_id"] == "CM-SENS"
+
+
+def test_llm_cannot_clear_a_bribery_signal(monkeypatch):
+    fake_llm(monkeypatch, category_id="C025", lang="hi", locality="Vazirabad", possibly_sensitive=False)
     g = engine.submit(BRIBE)
-    assert g["category_id"] == "CM-07" and g["decision"] == "HUMAN_REVIEW" and g["rule_id"] == "CM-SENS"
+    assert g["decision"] == "HUMAN_REVIEW" and g["identity_hidden"]
 
 
 def test_llm_can_upgrade_to_sensitive(monkeypatch):
-    fake_llm(monkeypatch, category_id="CM-06")
-    g = engine.submit("Bhagya Nagar office staff keeps calling me at night.")
+    fake_llm(monkeypatch, category_id="C017")
+    g = engine.submit("Itwara office staff keeps calling me at night.")
     assert g["sensitive"] and g["decision"] == "HUMAN_REVIEW"
 
 
@@ -68,7 +75,7 @@ def test_llm_instruction_flag_routes_to_human(monkeypatch):
 def test_disagreement_lowers_confidence(monkeypatch):
     fake_llm(monkeypatch)
     agree = engine.submit(LIGHT)["confidence"]
-    fake_llm(monkeypatch, category_id="CM-04")
+    fake_llm(monkeypatch, category_id="C006")
     disagree = engine.submit(LIGHT)
     assert disagree["confidence"] < agree and disagree["decision"] == "HUMAN_REVIEW"
 
@@ -87,7 +94,7 @@ def test_llm_follow_up_question_used_in_chat(monkeypatch):
 
 def test_cross_language_retrieval_uses_translation():
     hits = engine.retrieve("इतवारा की सड़क पर गड्ढे हैं", "There are potholes on the road in Itwara.")
-    assert {h["lang"] for h in hits} - {"hi"} and all(h["category_id"] == "CM-05" for h in hits)
+    assert all(h["category_id"] == "C001" for h in hits)  # official history is English; the Hindi query still finds it
 
 
 # ---------------------------------------------------------------- API
@@ -98,12 +105,13 @@ def client():
 
 
 def test_api_master_data(client):
-    assert len(client.get("/api/master/categories").json()) == 10
+    assert len(client.get("/api/master/categories").json()) == 30 and len(client.get("/api/categories").json()) == 30
+    assert client.get("/api/data/health").json()["ok"]
     assert client.get("/api/master/departments").status_code == 200
 
 
 def test_api_chat_asks_for_location(client):
-    r = client.post("/api/chat", json=dict(session_id="a", message="The streetlight outside my house is not working.")).json()
+    r = client.post("/api/chat", json=dict(session_id="a", message="The streetlight outside my house is not working.")).json()  # no place named
     assert not r["complete"] and "where" in r["reply"].lower()
 
 
@@ -122,10 +130,18 @@ def test_api_blocks_invalid_transition(client):
 
 
 def test_api_officer_view_masks_identity(client):
-    g = client.post("/api/grievances", json=dict(text=BRIBE + " मेरा नाम सुरेश पाटिल है", name="Suresh", phone="9876543210")).json()
+    g = client.post("/api/grievances", json=dict(text=HARASS + " मेरा नाम सुरेश पाटिल है", name="Suresh", phone="9876543210")).json()
     d = client.get(f"/api/grievances/{g['ref']}?role=officer").json()
     assert d["phone"] == "Hidden" and "सुरेश" not in d["text"]
 
 
 def test_api_transcribe_without_key_reports_fallback(client):
     assert "error" in client.post("/api/transcribe?lang=mr", content=b"\x00" * 10, headers={"Content-Type": "audio/webm"}).json()
+
+
+def test_api_guide_endpoints(client):
+    g = client.post("/api/grievances", json=dict(text=LIGHT)).json()
+    assert client.get("/api/grievances/history?q=streetlight&k=3").json()[0]["category_id"] == "C009"
+    assert client.get(f"/api/audit-logs?ref={g['ref']}&actor=AI_SYSTEM").json()
+    assert client.post("/api/work-orders", json=dict(ref=g["ref"], note="inspect")).json()["ok"]
+    assert client.patch(f"/api/grievances/{g['ref']}/status", json=dict(action="close")).status_code == 409  # cannot skip citizen confirmation

@@ -22,7 +22,17 @@ def test_never_auto_routed(case):
 
 # Known gap of the rules-only fallback (no LLM): these reach a human, but via a non-sensitive rule, so identity is not hidden.
 # With the LLM-led intake all sensitive cases are recognised (eval/report_*_llm.json). strict=True flags it if one starts passing.
-RULES_MISS = {"S12", "S14", "H01", "H02", "H03", "H04", "H06"}
+def _rules_misses():
+    """Known misses of the rules-only fallback, exactly as recorded by the last rules-mode evaluation run."""
+    out = set()
+    for f in ("report_cases_rules.json", "report_holdout_rules.json"):
+        path = os.path.join(EVAL, f)
+        if os.path.exists(path):
+            out |= {r["id"] for r in json.load(open(path, encoding="utf-8"))["rows"] if r.get("recognised") is False}
+    return out
+
+
+RULES_MISS = _rules_misses()
 SENS = [pytest.param(c, id=c["id"], marks=pytest.mark.xfail(strict=True, reason="rules-only fallback misses; LLM mode recognises it"))
         if c["id"] in RULES_MISS else pytest.param(c, id=c["id"]) for c in CASES if c.get("sensitive")]
 

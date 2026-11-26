@@ -46,6 +46,61 @@ def guard(fn, *a):
         raise HTTPException(409, str(e))
 
 
+# ---- endpoint names suggested by the official dataset guide (aliases of the routes below)
+@app.get("/api/categories")
+def categories_alias():
+    return categories()
+
+
+@app.get("/api/departments")
+def departments_alias():
+    return departments()
+
+
+@app.get("/api/grievances/history")
+def history_search(q: str = "", category_id: str = "", taluka: str = "", k: int = 10):
+    """Search the official mock history: semantic top-k when q is given, else filter."""
+    if q:
+        return engine.retrieve(engine.redact(q), None, k=min(k, 50))
+    rows = [h for h in engine.M["hist"] if (not category_id or h["category_id"] == category_id) and (not taluka or h["taluka"] == taluka)]
+    return rows[:min(k, 200)]
+
+
+@app.patch("/api/grievances/{ref}/assign")
+def assign(ref: str, a: Act):
+    need(ref)
+    return guard(engine.officer_action, ref, "assign", a.note)
+
+
+@app.patch("/api/grievances/{ref}/status")
+def status(ref: str, a: Act):
+    """action: propose | close (officer) — every change is written to the audit log."""
+    need(ref)
+    return guard(engine.officer_action, ref, a.action, a.note)
+
+
+@app.post("/api/work-orders")
+def work_order(w: dict):
+    g = need(w.get("ref", ""))
+    engine.webhook(g, "work_order.created", dict(note=str(w.get("note", ""))[:300]))
+    return dict(ok=True, ref=g["ref"], department=g["department"])
+
+
+@app.get("/api/audit-logs")
+def audit_logs(ref: str = "", actor: str = "", limit: int = 200):
+    sql, args = "select * from audit where 1=1", []
+    if ref:
+        sql, args = sql + " and ref=?", args + [ref]
+    if actor:
+        sql, args = sql + " and actor=?", args + [actor]
+    return db.q(sql + " order by id desc limit ?", tuple(args + [min(limit, 1000)]))
+
+
+@app.get("/api/data/health")
+def data_health():
+    return dict(engine.M["health"], embedding_model=engine.M.get("embedding_model"), embedding_error=engine.M.get("embed_error"))
+
+
 @app.get("/api/master/categories")
 def categories():
     return list(engine.M["cats"].values())
@@ -74,7 +129,7 @@ async def transcribe(request: Request, lang: str = "mr"):
 
 @app.get("/api/config")
 def config():
-    return dict(llm=bool(os.environ.get("GROQ_API_KEY")), model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b") if os.environ.get("GROQ_API_KEY") else engine.RULES_MODEL,
+    return dict(embeddings=engine.M.get("embedding_model"), data=engine.M["health"]["data_dir"], llm=bool(os.environ.get("GROQ_API_KEY")), model=os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b") if os.environ.get("GROQ_API_KEY") else engine.RULES_MODEL,
                 server_speech=bool(os.environ.get("GROQ_API_KEY")), langfuse=bool(os.environ.get("LANGFUSE_PUBLIC_KEY")))
 
 
@@ -137,7 +192,7 @@ def stats():
         b["total"] += 1
         b["human"] += g["decision"] == "HUMAN_REVIEW"
         b["priority"] += g["priority"]
-    hot = Counter((h["locality"], h["category_id"]) for h in engine.M["hist"] if h["feedback"] == "Not satisfied" or h["breached"])
+    hot = Counter((h["taluka"], h["category_id"]) for h in engine.M["hist"] if h["feedback"] == "Not satisfied" or h["breached"])
     reports = {}
     for name in ("cases_llm", "cases_rules", "holdout_llm_firstrun", "holdout_rules_firstrun", "holdout_llm", "holdout_rules"):
         f = os.path.join(ROOT, "eval", f"report_{name}.json")
@@ -149,7 +204,9 @@ def stats():
                 sensitive=sum(g["sensitive"] for g in gs), sensitive_closed_by_ai=0, groups=len({g["group_id"] for g in gs if g.get("group_id")}),
                 escalations=sum(g["rule_id"] == "ESC" for g in gs), ai_proposed=len(ai_proposed), ai_reopened=len(reopened),
                 rules=Counter(g["rule_id"] for g in gs), by_lang=by_lang,
-                hotspots=[dict(locality=k[0], category=engine.M["cats"][k[1]]["category"], count=v) for k, v in hot.most_common(8)],
+                hotspots=[dict(locality=k[0], category=engine.M["cats"][k[1]]["subcategory"], count=v) for k, v in hot.most_common(8)],
+                data=engine.M["health"], embedding_model=engine.M.get("embedding_model"),
+                groups_suggested=len({g["group_id"] for g in gs if g.get("group_id") and g.get("group_status") == "suggested"}),
                 reports=reports,
                 notifications=db.q("select * from notification order by id desc limit 12"),
                 webhooks=db.q("select * from webhook order by id desc limit 12"),

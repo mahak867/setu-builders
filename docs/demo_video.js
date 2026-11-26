@@ -36,7 +36,7 @@ const post = (u, b) => fetch(B + u, { method: 'POST', headers: { 'Content-Type':
 
   await card(`<div><div style="font-size:64px;font-weight:800">न्याय सेतू · Nyay Setu</div>
     <div style="font-size:30px;margin-top:14px">AI proposes · Rules decide · Citizens confirm</div>
-    <div style="font-size:20px;margin-top:28px;opacity:.8">Team Setu Builders · HackFusion 4 · working prototype on synthetic data</div></div>`, 4500);
+    <div style="font-size:20px;margin-top:28px;opacity:.8">Team Setu Builders · HackFusion 4 · running on the official Nanded-district dataset</div></div>`, 4500);
 
   // ---- Scenario 1: routine Marathi complaint
   await p.goto(B + '/#citizen'); await wait(800);
@@ -45,7 +45,7 @@ const post = (u, b) => fetch(B + u, { method: 'POST', headers: { 'Content-Type':
   await p.click('#send');
   await cap('The LLM intake agent notices the location is missing', 'and asks for it in Marathi', 0);
   await p.waitForSelector('.msg.bot:nth-of-type(3)', { timeout: 60000 }); await wait(2500);
-  await typeIn('#msg', 'भाग्य नगर, हनुमान मंदिराजवळ');
+  await typeIn('#msg', 'भोकर शहर, बस स्थानकाजवळ');
   await p.click('#send');
   await p.waitForSelector('.draft', { timeout: 60000 });
   await hl('.draft');
@@ -62,8 +62,8 @@ const post = (u, b) => fetch(B + u, { method: 'POST', headers: { 'Content-Type':
 
   // ---- background cases for scenarios 2 and 3
   await cap('Filing more complaints in the background…', '', 0);
-  const s2 = await post('/api/grievances', { text: 'वजीराबाद कार्यालय का बाबू मेरी फाइल आगे बढ़ाने के लिए रिश्वत मांग रहा है। मेरा नाम सुरेश पाटिल है, फोन 9876543210, कृपया नाम गुप्त रखें।', name: 'Suresh Patil', phone: '9876543210' });
-  const s3 = await post('/api/grievances', { text: 'तरोडा मधील गटार पुन्हा तुंबले आहे, सांडपाणी रस्त्यावर येत आहे.' });
+  const s2 = await post('/api/grievances', { text: 'किनवट बस स्टैंड के पास एक आदमी रोज़ शाम को महिलाओं का पीछा करता है और छेड़ता है। मेरा नाम सुनीता जाधव है, फोन 9876543210, कृपया नाम गुप्त रखें।', name: 'Sunita Jadhav', phone: '9876543210' });
+  const s3 = await post('/api/grievances', { text: 'पाथरड येथे पुन्हा कचरा उचलला नाही, घंटागाडी आलीच नाही.' });
   await post('/api/grievances', { text: 'इतवारा मधील रस्त्यावर मोठे खड्डे पडले आहेत.' });
   await post('/api/grievances', { text: 'Huge potholes on the main road in Itwara, two bikes fell yesterday.' });
   const d3 = await post('/api/grievances', { text: 'इतवारा की सड़क पर गड्ढे हैं, बहुत परेशानी हो रही है।' });
@@ -72,32 +72,32 @@ const post = (u, b) => fetch(B + u, { method: 'POST', headers: { 'Content-Type':
   // ---- Scenario 2: sensitive case
   await p.goto(B + '/#officer'); await p.waitForSelector('.q');
   await p.click(`.q[data-r="${s2.ref}"]`); await p.waitForSelector('#detail .rule'); await wait(600);
-  await cap('Scenario 2 · A sensitive complaint in Hindi: an official demanding a bribe', '', 3500);
+  await cap('Scenario 2 · A sensitive complaint in Hindi: a woman being followed and harassed near the Kinwat bus stand', '', 3500);
   await hl('#detail .rule');
-  await cap('Category Master marks Corruption as Sensitive → rule CM-SENS', 'Always human review. Never auto-closed. The rule is code, not a prompt.', 5000);
+  await cap('The official Category Master marks C017 (women safety / harassment) Sensitive → rule CM-SENS', 'Always human review. Never auto-closed. The rule is code, not a prompt.', 5000);
   await p.evaluate(() => { const k = [...document.querySelectorAll('#detail .kv span')].find(s => s.textContent.includes('Hidden')); if (k) { k.scrollIntoView({ block: 'center' }); k.style.background = '#fbeee6'; } });
   await cap('Identity hidden from the officer; name and phone redacted before any LLM call', 'Confidence, the exact rule and the retrieved past cases are shown, labelled as AI suggestions', 5000);
   await p.evaluate(() => [...document.querySelectorAll('#detail h3')].find(h => h.textContent.includes('Agent trace'))?.scrollIntoView({ block: 'center' }));
-  await cap('Every step is traced: redaction → rules cross-check → LLM intake → retrieval → duplicates → SLA → policy → action', 'Each grievance also gets a public Langfuse trace', 5000);
+  await cap('Every step is traced: redaction → rules cross-check → LLM intake → retrieval → duplicates → SLA → policy → action', 'Sensitive traces stay restricted; routine ones are public with localities masked to the taluka', 5000);
 
   // ---- Scenario 3: duplicates + escalation
   await p.evaluate(() => scrollTo(0, 0));
   await p.click(`.q[data-r="${d3.ref}"]`); await p.waitForFunction(r => document.querySelector('#detail h2').textContent.includes(r), d3.ref); await wait(600);
   await cap('Scenario 3 · Three pothole complaints in Marathi, English and Hindi', '', 3000);
   await p.evaluate(() => [...document.querySelectorAll('#detail h3')].find(h => h.textContent.includes('Duplicate group'))?.scrollIntoView({ block: 'center' }));
-  await cap('Grouped into one incident, never merged: each keeps its own reference number and updates', 'Priority rises with affected population, not with raw complaint count', 5000);
+  await cap('Suggested as one incident for the officer to confirm, never merged: each keeps its own reference number', 'Priority rises with affected population, not with raw complaint count', 5000);
   await p.evaluate(() => [...document.querySelectorAll('#detail h3')].find(h => h.textContent.includes('Retrieved'))?.scrollIntoView({ block: 'center' }));
-  await cap('Case memory finds Marathi and English precedents for a Hindi complaint', 'via the intake agent\'s English translation (cross-language retrieval)', 4500);
+  await cap('Case memory finds official past cases (GRV-…) for a Hindi complaint', 'multilingual embeddings: the official history is in English, the complaint is not', 4500);
   await p.evaluate(() => scrollTo(0, 0));
   await p.click(`.q[data-r="${s3.ref}"]`); await p.waitForFunction(r => document.querySelector('#detail h2').textContent.includes(r), s3.ref); await wait(600);
   await hl('#detail .rule');
-  await cap('A recurring blocked drain in Taroda → rule ESC', 'Escalated to the supervisor BEFORE the deadline: earlier closures here were late or unsatisfactory', 5500);
+  await cap('Missed garbage collection in Pathrad, again → rule ESC', 'Escalated before the deadline, citing official past cases here that ended late or unsatisfied', 5500);
 
   // ---- Safety scorecard
   await p.goto(B + '/#admin'); await p.waitForSelector('#score .kpi'); await wait(500);
   await cap('Measured, not claimed: adversarial safety evaluation', '0 sensitive cases auto-routed · 0 closed by AI · 0 automatic rejections · 0 prompt injections succeeded', 5500);
   await p.evaluate(() => document.querySelector('#fails').scrollIntoView({ block: 'center' }));
-  await cap('Includes a held-out set written after tuning, with the misses reported as found', '105 automated tests run on every push', 5500);
+  await cap('Includes a held-out set and a rules-only fallback run, every miss reported', '128 automated tests run on every push', 5500);
   await cap('', '', 0);
 
   await card(`<div><div style="font-size:46px;font-weight:800">Nyay Setu</div>

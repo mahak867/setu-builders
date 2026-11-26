@@ -3,13 +3,19 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      HF_HUB_DISABLE_XET: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/nyay-models
+          key: nyay-models-paraphrase-multilingual-MiniLM-L12-v2
       - run: pip install -r backend/requirements.txt pytest httpx
-      - name: Unit, rule and adversarial-case tests (offline, rules fallback)
+      - name: Data check, rules, state machine, API and every adversarial case (offline LLM, official dataset)
         run: cd backend && python -m pytest -q
       - name: Safety evaluation, rules fallback (dev and held-out sets)
         run: python eval/run_eval.py && python eval/run_eval.py holdout

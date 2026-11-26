@@ -1,0 +1,31 @@
+category_id,terms
+C001,pothole|potholes|damaged road|broken road|road damage|road is damaged|खड्डा|खड्डे|खड्ड्या|रस्ता खराब|रस्त्याची दुरवस्था|गड्ढा|गड्ढे|सड़क टूट|टूटी सड़क|gaddha|gadde|sadak tooti
+C002,footpath|sidewalk|pavement|फूटपाथ|फुटपाथ|पदपथ|पादचारी मार्ग|fuutpath
+C003,pipeline leak|pipe leak|leakage|pipe burst|pipeline burst|water pipe|जलवाहिनी फुट|पाईपलाईन फुट|पाइपलाइन फुट|गळती|पाइपलाइन से पानी|पाईप फुट|pipeline leak|पानी बह रहा|पाणी वाया
+C004,no water|water supply|irregular water|water not coming|tap water|नळाला पाणी येत नाही|पाणीपुरवठा|पाणी येत नाही|पानी नहीं आ|पानी नहीं आता|जल आपूर्ति|nal mein paani|paani nahi
+C005,dirty water|contaminated water|water quality|muddy water|smelly water|गढूळ पाणी|दूषित पाणी|घाण पाणी|गंदा पानी|दूषित पानी|गंदा पानी आ|ganda paani
+C006,garbage not collected|waste collection|garbage collection|garbage van|dustbin|कचरा उचलला नाही|कचरा उचललेला नाही|घंटागाडी|कचरा गाडी|कूड़ा नहीं उठ|कूड़ा गाड़ी|कचरा नहीं उठा|kachra nahi utha|garbage gaadi
+C007,open dumping|litter|garbage dumped|dumping|कचऱ्याचा ढीग|उघड्यावर कचरा|कचरा टाकला|कूड़े का ढेर|कचरे का ढेर|kachre ka dher
+C008,drain|drainage|sewage|sewer|gutter|blocked drain|गटार|तुंबल|सांडपाणी|नाला|ड्रेनेज|नाली|सीवर|गटर|nali|naali
+C009,streetlight|street light|street lamp|lamp post|light pole|पथदिवा|पथदिवे|रस्त्यावरील दिवा|रस्त्यावरील दिवे|स्ट्रीट लाइट|स्ट्रीट लाईट|स्ट्रीटलाइट|बत्ती|street ki light|khamba
+C010,live wire|exposed wire|hanging wire|wire hanging|wire is hanging|loose wire|wire|sparks|spark|electric shock|transformer|sparking|short circuit|विजेची तार|वीजेची तार|तार तुटल|करंट|शॉक|ट्रान्सफॉर्मर|ठिणग्या|बिजली का तार|तार लटक|ट्रांसफार्मर|चिंगारी|bijli ka taar
+C011,health centre|health center|phc|primary health|hospital|doctor not available|medicine not available|आरोग्य केंद्र|प्राथमिक आरोग्य|दवाखाना|डॉक्टर नाही|औषध नाही|स्वास्थ्य केंद्र|अस्पताल|डॉक्टर नहीं|दवा नहीं
+C012,public toilet|unsafe sanitation|open defecation|stagnant water|mosquito|सार्वजनिक शौचालय|शौचालय|डास|साचलेले पाणी|सार्वजनिक शौचालय गंदा|मच्छर|शौचालय गंदा|machhar
+C013,certificate|income certificate|caste certificate|birth certificate|record service|bonafide|7/12|दाखला|दाखले|प्रमाणपत्र|उत्पन्नाचा दाखला|जन्म दाखला|सर्टिफिकेट|आय प्रमाणपत्र|जाति प्रमाणपत्र
+C014,land record|land correction|mutation|7/12 correction|satbara|सातबारा|फेरफार|जमिनीचा उतारा|भूमि अभिलेख|जमीन रिकॉर्ड|khasra
+C015,gram panchayat|panchayat|sarpanch|gramsevak|ग्रामपंचायत|ग्राम पंचायत|सरपंच|ग्रामसेवक|पंचायत
+C016,park|garden|playground|public space|उद्यान|बाग|मैदान|पार्क|बगीचा
+C017,harass|harassment|stalk|molest|eve teasing|inappropriate|follows me|उत्पीड़न|छेड़|छेडछाड|छळ|छळवणूक|विनयभंग|अश्लील|दुर्व्यवहार|गैरवर्तन|पाठलाग|पीछा
+C018,child abuse|child safety|child labour|child marriage|child protection|minor|बालविवाह|बालकामगार|बाल मजदूर|बाल विवाह|बाल शोषण|मुलांचे शोषण|बच्चों का शोषण
+C019,scheme|pension|scholarship|welfare|subsidy|योजना|अनुदान|पेन्शन|शिष्यवृत्ती|पेंशन|छात्रवृत्ति|लाभ नहीं मिला|yojana
+C020,school building|classroom|school roof|school toilet|school|शाळा|शाळेची|वर्गखोली|स्कूल|विद्यालय|कक्षा
+C021,bus stop|bus shelter|bus service|st bus|बस थांबा|बसस्थानक|एसटी|बस स्टॉप|बस स्टैंड|bus nahi
+C022,agriculture officer|seeds|fertiliser|fertilizer|crop advice|krishi|बियाणे|खते|कृषी|कृषी सहायक|बीज|खाद|कृषि
+C023,canal|irrigation|कालवा|सिंचन|पाटबंधारे|नहर|सिंचाई|nahar
+C024,veterinary|vet|cattle|livestock|animal doctor|पशुवैद्यकीय|जनावरे|गुरे|पशु चिकित्सा|पशु डॉक्टर|मवेशी
+C025,ration|ration shop|fair price shop|pds|रेशन|रेशन दुकान|स्वस्त धान्य|राशन|राशन की दुकान|rashan
+C026,threat|threatened|violence|attack|assault|weapon|fight|धमकी|धमकाव|हल्ला|मारहाण|हिंसा|मारपीट|हमला|dhamki
+C027,flood|flooding|storm|cyclone|heavy rain damage|पूर|पुराचे पाणी|वादळ|अतिवृष्टी|बाढ़|तूफान|आंधी
+C028,wrong department|transferred|not my department|sent to another office|चुकीच्या विभाग|गलत विभाग|दूसरे विभाग
+C029,again and again|repeatedly|still not resolved|complained many times|same problem again|पुन्हा पुन्हा|वारंवार|अजूनही सुटले नाही|बार बार|फिर से वही|अब तक हल नहीं
+C030,hiv|mental health|abortion|confidential medical|psychiatric|गोपनीय उपचार|मानसिक आरोग्य|गर्भपात|मानसिक स्वास्थ्य|गोपनीय इलाज
